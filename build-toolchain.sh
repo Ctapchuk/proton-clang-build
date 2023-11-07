@@ -2,6 +2,8 @@
 
 set -eo pipefail
 
+install=$(dirname "$(readlink -f "$0")")/install
+
 # Function to show an informational message
 function msg() {
     echo -e "\e[1;32m$@\e[0m"
@@ -13,15 +15,19 @@ function msg() {
 # Build LLVM
 msg "Building LLVM..."
 ./build-llvm.py \
-	--clang-vendor "Proton" \
-	--targets "ARM;AArch64;X86" \
+	--install-folder "$install" \
+	--vendor-string "Proton" \
+	--targets "ARM" "AArch64" "X86" \
 	"$repo_flag" \
 	--pgo kernel-defconfig \
+	--quiet-cmake \
 	--lto full
 
 # Build binutils
 msg "Building binutils..."
-./build-binutils.py --targets arm aarch64 x86_64
+./build-binutils.py \
+	--install-folder "$install" \
+	--targets arm aarch64 x86_64
 
 # Remove unused products
 msg "Removing unused products..."
